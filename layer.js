@@ -51,6 +51,40 @@ export const getStepCountToday = async (setFunc) => {
     case 'android':
 
       console.log("Android daily steps");
+
+      GoogleFit.onAuthorize(() => {
+        console.log('Sucess 5555 authentification')
+
+        const options = {
+          startDate: "2020-09-01T00:00:17.971Z", // required ISO8601Timestamp
+          endDate: new Date().toISOString(), // required ISO8601Timestamp
+          bucketUnit: "SECOND", // optional - default "DAY". Valid values: "NANOSECOND" | "MICROSECOND" | "MILLISECOND" | "SECOND" | "MINUTE" | "HOUR" | "DAY"
+          bucketInterval: 1, // optional - default 1. 
+      };
+      GoogleFit.getDailyStepCountSamples(options)
+          .then((res) => {
+              console.log("AndroidCodeNow")
+              ret = {};
+              res.map(x => {
+                console.log(x["source"]); 
+                x["steps"].map(y=> {
+                  console.log(y);
+                if (!ret[x["source"]]) {
+                  ret[x["source"]] = []
+                }
+                  ret[x["source"]].push(y);
+                });
+              });
+              console.log(ret);
+              alert(JSON.stringify(res))
+          })
+          .catch((err) => {
+              console.log(err)
+          })
+
+      });
+
+
       break;
     default:
       throw new Error('Invalid platform: ' + Platform.OS);
@@ -147,35 +181,6 @@ export const connect = () => {
                 console.log("AUTH_SUCCESS");
                 console.log(GoogleFit.isAuthorized + ": googlefit authorized");
                 
-                const options = {
-                  startDate: "2020-09-01T00:00:17.971Z", // required ISO8601Timestamp
-                  endDate: new Date().toISOString(), // required ISO8601Timestamp
-                  bucketUnit: "SECOND", // optional - default "DAY". Valid values: "NANOSECOND" | "MICROSECOND" | "MILLISECOND" | "SECOND" | "MINUTE" | "HOUR" | "DAY"
-                  bucketInterval: 1, // optional - default 1. 
-              };
-  
-              GoogleFit.getDailyStepCountSamples(options)
-                  .then((res) => {
-                      console.log("AndroidCodeNow")
-                      ret = {};
-                      res.map(x => {
-                        console.log(x["source"]); 
-                        x["steps"].map(y=> {
-                          console.log(y);
-                        if (!ret[x["source"]]) {
-                          ret[x["source"]] = []
-                        }
-                          ret[x["source"]].push(y);
-                        });
-                      });
-                      console.log(ret);
-                      alert(JSON.stringify(res))
-                  })
-                  .catch((err) => {
-                      console.log(err)
-                  })
-
-
                 console.log("doneken420");
 
                 // getData(start, end, callback)
