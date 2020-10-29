@@ -6,8 +6,6 @@ import GoogleFit, {
   Scopes
 } from 'react-native-google-fit'
 
-
-
 let options = {
   permissions: {
     read: [
@@ -26,7 +24,10 @@ let options = {
 
 let TodaysDate = new Date();
 let fetchDate = {
-  date: TodaysDate.toISOString()
+  startDate: "2020-10-22T23:15:50.787Z"
+};
+let options3 = {
+  startDate: (new Date(2020, 10, 23)).toISOString(), // required
 };
 
 export const getStepCountToday = async (setFunc) => {
@@ -37,29 +38,18 @@ export const getStepCountToday = async (setFunc) => {
           console.log(err);
           return;
         }
+        console.log("steps result\n");
+        ret = {}; 
+        ret["ios.dailysteps"] = [];
+        var date = results.endDate.split("T");
+        ret["ios.dailysteps"].push({"date": date[0], "value": results.value});
+        console.log(ret);
+        console.log("steps done\n");
         setFunc(results.value)
       });
       break;
     case 'android':
-      
-      const option2s = {
-        startDate: "2017-01-01T00:00:17.971Z", // required ISO8601Timestamp
-        endDate: new Date().toISOString() // required ISO8601Timestamp
-      };
-      
-      GoogleFit.getDailyStepCountSamples(option2s, (err, res) => {
-        if (err) {
-          throw err;
-        }
-      
-        console.log("Daily steps >>>", res);
-      });
-      // GoogleFit.getDailyStepCountSamples(androidOptions)
-      //  .then((res) => {
-      //      console.log('Daily steps >>> ', res)
-      //  })
-      //  .catch((err) => {console.warn(err)})
-      
+
       console.log("Android daily steps");
       break;
     default:
@@ -92,8 +82,8 @@ export const getHeartRate = async (sDate, eDate, setFunc) => {
       const callback = ((error, response) => {
         console.log(error, response)
       });
-      
-      GoogleFit.getHeartRateSamples(optionsHeartRate, callback)
+
+      // GoogleFit.getHeartRateSamples(optionsHeartRate, callback)
       console.log("Android heartrate");
       break;
     default:
@@ -126,10 +116,10 @@ export const getDistanceCycling = async (setFunc) => {
 
 const optionsGoogle = {
   scopes: [
+    Scopes.FITNESS_ACTIVITY_READ,
     Scopes.FITNESS_ACTIVITY_READ_WRITE,
+    Scopes.FITNESS_BODY_READ,
     Scopes.FITNESS_BODY_READ_WRITE,
-    Scopes.FITNESS_BLOOD_PRESSURE_READ_WRITE,
-    Scopes.FITNESS_BLOOD_PRESSURE_READ
   ],
 }
 
@@ -146,27 +136,59 @@ export const connect = () => {
       });
       break;
     case 'android':
-      console.log("Android WE IT");
+      console.log("Android: IN");
       GoogleFit.checkIsAuthorized().then(() => {
-        console.log(GoogleFit.isAuthorized)
-        
-        // if (!GoogleFit.isAuthorized) {
-        //   GoogleFit.authorize(optionsGoogle)
-        //     .then(authResult => {
-        //       if (authResult.success) {
-        //         console.log("AUTH_SUCCESS");
+        console.log(GoogleFit.isAuthorized + ": googlefit authorized")
 
-        //         // getData(start, end, callback)
-        //       } else {
-        //         console.log("AUTH_DENIED", authResult.message);
-        //       }
-        //     })
-        //     .catch((error) => {
-        //       console.log(error + "AUTH_ERROR");
-        //     })
-        // }
+        if (!GoogleFit.isAuthorized) {
+          GoogleFit.authorize(optionsGoogle)
+            .then(authResult => {
+              if (authResult.success) {
+                console.log("AUTH_SUCCESS");
+                console.log(GoogleFit.isAuthorized + ": googlefit authorized");
+                
+                const options = {
+                  startDate: "2020-09-01T00:00:17.971Z", // required ISO8601Timestamp
+                  endDate: new Date().toISOString(), // required ISO8601Timestamp
+                  bucketUnit: "SECOND", // optional - default "DAY". Valid values: "NANOSECOND" | "MICROSECOND" | "MILLISECOND" | "SECOND" | "MINUTE" | "HOUR" | "DAY"
+                  bucketInterval: 1, // optional - default 1. 
+              };
+  
+              GoogleFit.getDailyStepCountSamples(options)
+                  .then((res) => {
+                      console.log("AndroidCodeNow")
+                      ret = {};
+                      res.map(x => {
+                        console.log(x["source"]); 
+                        x["steps"].map(y=> {
+                          console.log(y);
+                        if (!ret[x["source"]]) {
+                          ret[x["source"]] = []
+                        }
+                          ret[x["source"]].push(y);
+                        });
+                      });
+                      console.log(ret);
+                      alert(JSON.stringify(res))
+                  })
+                  .catch((err) => {
+                      console.log(err)
+                  })
+
+
+                console.log("doneken420");
+
+                // getData(start, end, callback)
+              } else {
+                console.log("AUTH_DENIED", authResult.message);
+              }
+            })
+            .catch((error) => {
+              console.log(error + "AUTH_ERROR");
+            })
+        }
       })
-      GoogleFit.onAuthorize();
+      console.log(GoogleFit.isAuthorized + ": googlefit authorized")
       break;
     default:
       throw new Error('Invalid platform: ' + Platform.OS);

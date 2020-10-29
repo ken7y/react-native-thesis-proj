@@ -17,8 +17,7 @@ import {
   StatusBar,
   useState
 } from 'react-native';
-
-
+import GFit from '../MyProj/gfit';
 import { connect, getStepCountToday, getHeartRate , getDistanceCycling} from '../MyProj/layer';
 
 import {
@@ -50,7 +49,7 @@ const CounterSteps = () => {
 
 const CounterHeartRate = () => {
   const [ counterHeartRate, setCounterHeartRate ] = React.useState("");
-  getHeartRate(new Date(2016,4,27), new Date(), setCounterHeartRate);
+  // getHeartRate(new Date(2016,4,27), new Date(), setCounterHeartRate);
   return (
       <>
           <Text>HeartRate: {counterHeartRate}</Text>
@@ -60,7 +59,7 @@ const CounterHeartRate = () => {
 
 const CounterDistanceCycling = () => {
   const [ counterDistanceCycling, setCounterDistanceCycling ] = React.useState("");
-  getDistanceCycling(setCounterDistanceCycling);
+  // getDistanceCycling(setCounterDistanceCycling);
   console.log("CYCLING ")
   console.log(counterDistanceCycling);
   return (
@@ -94,6 +93,7 @@ const App = () =>{
             </View>
           )}
           <View style={styles.body}>
+            <GFit></GFit>
             <View style={styles.sectionContainer}>
               <Text style={styles.sectionTitle}>Step One</Text>
               <Text style={styles.sectionDescription}>
