@@ -15,10 +15,12 @@ import {
   View,
   Text,
   StatusBar,
-  useState
+  useState,
+  Button,
+  Alert
 } from 'react-native';
 import GFit from '../MyProj/gfit';
-import { connect, getStepCountToday, getHeartRate , getDistanceCycling} from '../MyProj/layer';
+import { connect, getStepCountToday2, getHeartRate, getBloodPressure } from '../MyProj/layer';
 
 import {
   Header,
@@ -36,10 +38,14 @@ function ConnectToApp(){
   }
 };
 
+let fetch2Date = {
+  startDate: new Date(2020, 1, 1).toISOString(),
+  endDate: new Date(2020, 11, 11).toISOString()
 
+};
 const CounterSteps = () => {
-  const [ counterSteps, setCounterSteps ] = React.useState(0);
-  getStepCountToday(setCounterSteps);
+  const [ counterSteps, setCounterSteps ] = React.useState("");
+  getStepCountToday2(fetch2Date, setCounterSteps).then(x => {console.log(x)});
   return (
       <>
           <Text>Steps: {counterSteps}</Text>
@@ -49,12 +55,15 @@ const CounterSteps = () => {
 
 const CounterHeartRate = () => {
   const [ counterHeartRate, setCounterHeartRate ] = React.useState("");
-  // getHeartRate(new Date(2016,4,27), new Date(), setCounterHeartRate);
+  // getBloodPressure(new Date(2016,4,27), new Date(), setCounterHeartRate).then(res => {console.log(res)});
   return (
       <>
           <Text>HeartRate: {counterHeartRate}</Text>
       </>
   )
+}
+const handleClick = () => {
+  alert('Button clicked!');
 }
 
 const CounterDistanceCycling = () => {
@@ -69,6 +78,7 @@ const CounterDistanceCycling = () => {
 )
 
 }
+
 
 
 const App = () =>{
@@ -90,16 +100,16 @@ const App = () =>{
           {global.HermesInternal == null ? null : (
             <View style={styles.engine}>
               <Text style={styles.footer}>Engine: Hermes</Text>
+              
             </View>
           )}
           <View style={styles.body}>
-            <GFit></GFit>
             <View style={styles.sectionContainer}>
-              <Text style={styles.sectionTitle}>Step One</Text>
-              <Text style={styles.sectionDescription}>
-                Edit <Text style={styles.highlight}>App.js</Text> to change this
-                screen and then come back to see your edits.
-              </Text>
+              <Button
+                title="Press me for steps"
+                onPress={()=> handleClick()}
+              />
+
               <CounterSteps></CounterSteps>
               <CounterHeartRate></CounterHeartRate>
               <CounterDistanceCycling></CounterDistanceCycling>
