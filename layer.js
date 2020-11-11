@@ -19,7 +19,6 @@ const optionsGooglePermissions = {
     Scopes.FITNESS_REPRODUCTIVE_HEALTH_READ
   ],
 }
-const PERMS = AppleHealthKit.Constants.Permissions;
 
 const optionsApplePermissions = {
   permissions: {
@@ -27,13 +26,10 @@ const optionsApplePermissions = {
       'Height',
       'Weight',
       'StepCount',
-      'DateOfBirth',
-      'BodyMassIndex',
-      'ActiveEnergyBurned',
       'HeartRate',
-      'DistanceCycling',
       'BloodPressureDiastolic',
-      'BloodPressureSystolic'
+      'BloodPressureSystolic',
+      'SleepAnalysis'
     ],
   },
 };
@@ -68,118 +64,33 @@ export const connect = () => {
   }
 };
 
-let TodaysDate = new Date();
-let fetch2Date = {
-  startDate: "2020-10-22T23:15:50.787Z"
-};
-let options3 = {
-  startDate: (new Date(2020, 10, 23)).toISOString(), // required
-};
-
-export const getStepCountToday = async (dateOptions, setFunc) => {
+export const getHeartRate = async (inputOption) => 
+new Promise((resolve, reject) => {
   switch (Platform.OS) {
     case 'ios':
-    
-    let startDate = (new Date(2016, 10, 23)).toISOString(); // required
-    let endDate = (new Date(2020, 10, 23)).toISOString(); // required
-
-    let options = {
-      startDate,
-      endDate,
-      ascending: false,
-      limit: 10,
-      period: 1440,
-      unit: "Step(s)",
-      includeManuallyAdded: true,
-      };
-      
-      AppleHealthKit.getDailyStepCountSamples(options, (err, results) => {
+      AppleHealthKit.getHeartRateSamples(inputOption, (err, results) => {
         if (err) {
           console.log(err);
           return;
         }
-        ret = {}; 
-        ret["ios.dailysteps"] = [];
+        retHeartRate = {};
+        retHeartRate["ios.heartrate"] = [];
         results.map(x=> {
           var date = x.endDate.split("T");
-          ret["ios.dailysteps"].push({"date": date[0], "value": x.value});
+          retHeartRate["ios.heartrate"].push({"date": date[0], "value": x.value, "source": x.sourceId});
         });
-        // var date = results.endDate.split("T");
-        // ret["ios.dailysteps"].push({"date": date[0], "value": results.value});
-        console.log(ret);
-        console.log("steps done\n");
-        resolve(ret)
+        resolve(retHeartRate);
       });
       break;
     case 'android':
-
-      console.log("Android daily steps");
-
       GoogleFit.onAuthorize(() => {
         console.log('Sucess 5555 authentification')
 
         const options = {
-          startDate: "2020-09-01T00:00:17.971Z", // required ISO8601Timestamp
-          endDate: new Date().toISOString(), // required ISO8601Timestamp
-          bucketUnit: "SECOND", // optional - default "DAY". Valid values: "NANOSECOND" | "MICROSECOND" | "MILLISECOND" | "SECOND" | "MINUTE" | "HOUR" | "DAY"
-          bucketInterval: 1, // optional - default 1. 
-      };
-      GoogleFit.getDailyStepCountSamples(options)
-          .then((res) => {
-              console.log("AndroidCodeNow")
-              ret = {};
-              res.map(x => {
-                console.log(x["source"]); 
-                x["steps"].map(y=> {
-                  console.log(y);
-                if (!ret[x["source"]]) {
-                  ret[x["source"]] = []
-                }
-                  ret[x["source"]].push(y);
-                });
-              });
-              console.log(ret);
-              alert(JSON.stringify(res))
-          })
-          .catch((err) => {
-              console.log(err)
-          })
-
-      });
-
-
-      break;
-    default:
-      throw new Error('Invalid platform: ' + Platform.OS);
-  }
-  
-};
-export const getHeartRate = async (sDate, eDate, setFunc) => {
-  switch (Platform.OS) {
-    case 'ios':
-      let options = {
-        startDate: sDate.toISOString(), // required
-        endDate: eDate.toISOString(), // optional; default now
-      };
-      AppleHealthKit.getHeartRateSamples(options, (err, results) => {
-        if (err) {
-          console.log(err);
-          return;
-        }
-        console.log(results);
-        resolve(JSON.stringify(results));
-      });
-      break;
-    case 'android':
-      
-      GoogleFit.onAuthorize(() => {
-        console.log('Sucess 5555 authentification')
-
-        const options = {
-          startDate: "2017-01-01T00:00:17.971Z", // required
-          endDate: new Date().toISOString(), // required
+          startDate: "2017-01-01T00:00:17.971Z", 
+          endDate: new Date().toISOString(), 
           bucketUnit: "DAY", // optional - default "DAY". Valid values: "NANOSECOND" | "MICROSECOND" | "MILLISECOND" | "SECOND" | "MINUTE" | "HOUR" | "DAY"
-          bucketInterval: 1, // optional - default 1. 
+          bucketInterval: 1, 
         }
         const callback = ((error, response) => {
           if (error){
@@ -193,7 +104,6 @@ export const getHeartRate = async (sDate, eDate, setFunc) => {
                 "endDate": x.endDate
               }
               )});
-          console.log(ret);
         });
         GoogleFit.getBloodPressureSamples(options, callback);
       });
@@ -204,33 +114,33 @@ export const getHeartRate = async (sDate, eDate, setFunc) => {
     default:
       throw new Error('Invalid platform: ' + Platform.OS);
   }
-};
+});
 
-export const getBloodPressure = async (sDate, eDate, setFunc) => {
+export const getBloodPressure = async (inputOption) => 
+new Promise((resolve, reject) =>  {
   switch (Platform.OS) {
     case 'ios':
-      let options = {
-        unit: 'mmhg',	// optional; default 'mmhg'
-        // startDate: (new Date(2016,4,27)).toISOString(), // required
-        // endDate: (new Date()).toISOString(),	// optional; default now
-        startDate: sDate,
-        endDate: eDate,
-        ascending: false,	// optional; default false
-        limit:10, // optional; default no limit
-      };
-      AppleHealthKit.getBloodPressureSamples(options, (err, results) => {
+      AppleHealthKit.getBloodPressureSamples(inputOption, (err, results) => {
         if (err) {
           return;
         }
-        console.log(results)
-        return (results);
+        console.log("bloodpressure")
+        retBloodPressure = {}; 
+        retBloodPressure["ios.bloodpressure"] = [];
+        results.map(x => {retBloodPressure["ios.bloodpressure"].push(
+          { "bloodPressureSystolicValue":x.bloodPressureSystolicValue,
+            "bloodPressureDiastolicValue" :x.bloodPressureDiastolicValue,
+            "startDate": x.startDate,
+            "endDate": x.endDate
+          }
+          );});
+        console.log(retBloodPressure)
+        resolve(retBloodPressure);
       });
       break;
     case 'android':
       GoogleFit.onAuthorize(() => {
         const options = {
-          // startDate: "2017-01-01T00:00:17.971Z", // required
-          // endDate: new Date().toISOString(), // required
           startDate:sDate,
           endDate:eDate,
           bucketUnit: "DAY", 
@@ -241,15 +151,15 @@ export const getBloodPressure = async (sDate, eDate, setFunc) => {
           if (error){
             console.log(error)
           }
-          ret = [];
-            response.map(x => {ret.push(
+          retBloodPressure = [];
+            response.map(x => {retBloodPressure.push(
               { "bloodPressureSystolicValue":x.value,
                 "bloodPressureDiastolicValue" :x.value2,
                 "startDate": x.startDate,
                 "endDate": x.endDate
               }
               )});
-          return (ret);
+          return (retBloodPressure);
         });
         
         GoogleFit.getBloodPressureSamples(options, callback);
@@ -258,33 +168,9 @@ export const getBloodPressure = async (sDate, eDate, setFunc) => {
     default:
       throw new Error('Invalid platform: ' + Platform.OS);
   }
-};
+});
 
-
-// export const getDistanceCycling = async (setFunc) => {
-//   switch (Platform.OS) {
-//     case 'ios':
-//       let options = {};
-//       AppleHealthKit.getDistanceCycling(options, (err, results) => {
-//         if (err) {
-//           console.log(err);
-//           return;
-//         }
-//         setFunc((JSON.stringify(results)));
-//       });
-
-//       break;
-//     case 'android':
-//       console.log("Android daily steps");
-//       break;
-//     default:
-//       throw new Error('Invalid platform: ' + Platform.OS);
-//   }
-// };
-
-
-
-export const getStepCountToday2 = (dateOptions, setFunc) => 
+export const getStepCount = (inputOption) => 
 new Promise((resolve, reject) => {
   switch (Platform.OS) {
     case 'ios':
@@ -305,17 +191,13 @@ new Promise((resolve, reject) => {
           console.log(err);
           return;
         }
-        ret = {}; 
-        ret["ios.dailysteps"] = [];
+        retSteps = {}; 
+        retSteps["ios.dailysteps"] = [];
         results.map(x=> {
           var date = x.endDate.split("T");
-          ret["ios.dailysteps"].push({"date": date[0], "value": x.value});
+          retSteps["ios.dailysteps"].push({"date": date[0], "value": x.value});
         });
-        // var date = results.endDate.split("T");
-        // ret["ios.dailysteps"].push({"date": date[0], "value": results.value});
-        // console.log(ret);
-        console.log("steps done\n");
-        resolve(ret);
+        resolve(retSteps);
       });
       break;
     case 'android':
@@ -323,7 +205,7 @@ new Promise((resolve, reject) => {
       console.log("Android daily steps");
 
       GoogleFit.onAuthorize(() => {
-        console.log('Sucess 5555 authentification')
+        console.log('Sucess authentification')
 
         const options = {
           startDate: "2020-09-01T00:00:17.971Z", // required ISO8601Timestamp
@@ -336,16 +218,13 @@ new Promise((resolve, reject) => {
               console.log("AndroidCodeNow")
               ret = {};
               res.map(x => {
-                console.log(x["source"]); 
                 x["steps"].map(y=> {
-                  console.log(y);
                 if (!ret[x["source"]]) {
                   ret[x["source"]] = []
                 }
                   ret[x["source"]].push(y);
                 });
               });
-              console.log(ret);
               alert(JSON.stringify(res))
           })
           .catch((err) => {
@@ -355,6 +234,81 @@ new Promise((resolve, reject) => {
       });
 
 
+      break;
+    default:
+      throw new Error('Invalid platform: ' + Platform.OS);
+  }
+});
+
+export const getHeight = (inputOption) => 
+new Promise((resolve, reject) => {
+  switch (Platform.OS) {
+    case 'ios':
+    
+      AppleHealthKit.getHeightSamples(inputOption, (err, results) => {
+        if (err) {
+          console.log(err);
+          return;
+        }
+        retHeight = {}; 
+        retHeight["ios.height"] = [];
+        results.map(x=> {
+          retHeight["ios.height"].push({"value": x.value});
+        });
+        resolve(retHeight);
+      });
+      break;
+    case 'android':
+      console.log("Android height");
+      break;
+    default:
+      throw new Error('Invalid platform: ' + Platform.OS);
+  }
+});
+
+export const getWeight = (inputOption) => 
+new Promise((resolve, reject) => {
+  switch (Platform.OS) {
+    case 'ios':
+      AppleHealthKit.getWeightSamples(inputOption, (err, results) => {
+        if (err) {
+          console.log(err);
+          return;
+        }
+        retWeight = {}; 
+        retWeight["ios.weight"] = [];
+        results.map(x=> {
+          retWeight["ios.weight"].push({"value": x.value});
+        });
+        resolve(retWeight);
+      });
+      break;
+    case 'android':
+      console.log("Android weight");
+      break;
+    default:
+      throw new Error('Invalid platform: ' + Platform.OS);
+  }
+});
+
+export const getSleepData = (inputOption) => 
+new Promise((resolve, reject) => {
+  switch (Platform.OS) {
+    case 'ios':
+      AppleHealthKit.getSleepSamples(inputOption, (err, results) => {
+        if (err) {
+          console.log(err);
+          return;
+        }
+        console.log("Sleep")
+        console.log(results);
+        let retSleep = {}
+        retSleep["ios.sleep"] = results;
+        resolve(retSleep);
+      });
+      break;
+    case 'android':
+      console.log("Android weight");
       break;
     default:
       throw new Error('Invalid platform: ' + Platform.OS);

@@ -8,7 +8,8 @@ target 'MyProj' do
 
   use_react_native!(:path => config["reactNativePath"])
 
-  pod 'RCTAppleHealthKit', :path => '../node_modules/rn-apple-healthkit'
+
+  pod 'RNGestureHandler', :path => '../node_modules/react-native-gesture-handler'
 
   target 'MyProjTests' do
     inherit! :complete
