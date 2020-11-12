@@ -1,4 +1,5 @@
 // import { getHeartRate } from 'react-native-health-layer';
+import 'react-native-gesture-handler';
 import React from 'react';
 import {
   SafeAreaView,
@@ -14,6 +15,7 @@ import {
 } from 'react-native';
 import { connect, getStepCount, getHeartRate, getBloodPressure, getSleepData, getHeight, getWeight } from '../MyProj/layer';
 import { NavigationContainer } from '@react-navigation/native';
+import { createStackNavigator } from '@react-navigation/stack';
 
 import {
   Header,
@@ -41,22 +43,22 @@ const CounterSteps = () => {
 });
   return (
       <>
-          <Text>Steps</Text>
       </>
   )
 }
 
+const Stack = createStackNavigator();
+
 const CounterHeartRate = () => {
   const [ counterHeartRate, setCounterHeartRate ] = React.useState("");
-  getHeartRate(
-    {"startDate": new Date(2016,4,27).toISOString(),
-    "endDate": new Date().toISOString()
-    }).then(res => {
-    state.counterHeartRate = JSON.stringify(res);
-  });
+  // getHeartRate(
+  //   {"startDate": new Date(2016,4,27).toISOString(),
+  //   "endDate": new Date().toISOString()
+  //   }).then(res => {
+  //   state.counterHeartRate = JSON.stringify(res);
+  // });
   return (
       <>
-          <Text>HeartRate</Text>
       </>
   )
 }
@@ -71,7 +73,6 @@ const CounterHeight = () => {
   });
   return (
       <>
-          <Text>Height</Text>
       </>
   )
 }
@@ -86,7 +87,6 @@ const CounterSleep = () => {
   });
   return (
       <>
-          <Text>Sleep</Text>
       </>
   )
 }
@@ -102,11 +102,9 @@ const CounterWeight = () => {
   });
   return (
       <>
-          <Text>Weight</Text>
       </>
   )
 }
-
 
 const CounterBloodPressure = () => {
   const [ counterBloodPressure, setCounterBloodPressure ] = React.useState("");
@@ -121,7 +119,6 @@ const CounterBloodPressure = () => {
   });
   return (
       <>
-          <Text>BloodPressure</Text>
       </>
   )
 }
@@ -129,7 +126,6 @@ const CounterBloodPressure = () => {
 const handleStepsClick = () => {
   alert(state.counterSteps);
 }
-
 const handleHeartClick = () => {
   alert(state.counterHeartRate);
 }
@@ -147,38 +143,23 @@ const handleBloodPressureClick = () => {
 }
 
 
-const App = () =>{
-  state = {
-    counterSteps: "",
-    counterHeartRate: [],
-    counterHeight: "",
-    counterWeight: "",
-    counterSleep: "",
-    counterBloodPressure: "",
-  }
-
+const HomeScreen = ({ navigation }) =>{
   console.log("init");
   ConnectToApp();
   return (
-    <NavigationContainer>
+    <View>
     <StatusBar barStyle="dark-content" />
       <SafeAreaView>
         <ScrollView
           contentInsetAdjustmentBehavior="automatic"
           style={styles.scrollView}>
-          <Header />
-          {global.HermesInternal == null ? null : (
-            <View style={styles.engine}>
-              <Text style={styles.footer}>Engine: Hermes</Text>
-            </View>
-          )}
           <View style={styles.body}>
             <View style={styles.sectionContainer}>
-
               <Button
                 title="Press me for Steps"
                 onPress={()=> handleStepsClick()}
               />
+
               <Button
                 title="Press me for Heartrate"
                 onPress={()=> handleHeartClick()}
@@ -203,7 +184,12 @@ const App = () =>{
                 title="Press me for Sleep"
                 onPress={()=> handleSleepClick()}
               />
-
+              <Button
+                    title="View in full page"
+                    onPress={() =>
+                      navigation.navigate('Page View', { name: 'Jane' })
+                    }
+                  />
               <CounterSteps></CounterSteps>
               <CounterHeartRate></CounterHeartRate>
               <CounterHeight></CounterHeight>
@@ -214,9 +200,62 @@ const App = () =>{
           </View>
         </ScrollView>
       </SafeAreaView>
+    </View>
+  );
+};
+
+const App = () => {
+  state = {
+    counterSteps: "",
+    counterHeartRate: [],
+    counterHeight: "",
+    counterWeight: "",
+    counterSleep: "",
+    counterBloodPressure: "",
+  }
+  return (
+    
+    <NavigationContainer>
+      <Stack.Navigator>
+        <Stack.Screen
+          name="Home"
+          component={HomeScreen}
+          options={{ title: 'Home' }}
+        />
+        <Stack.Screen name="Page View" component={ProfileScreen} />
+      </Stack.Navigator>
     </NavigationContainer>
   );
 };
+
+const HomeScreen1 = ({ navigation }) => {
+  return (
+
+    <Button
+      title="Go to Jane's profile"
+      onPress={() =>
+        navigation.navigate('Profile', state)
+      }
+    />
+  );
+};
+const ProfileScreen = (input) => {
+  console.log("profilescreen")
+  return (
+  <View>
+  <ScrollView>
+
+  <Text>{state.counterSteps}</Text>
+  <Text>{state.counterHeartRate}</Text>
+  <Text>{state.counterHeight}</Text>
+  <Text>{state.counterWeight}</Text>
+  <Text>{state.counterSleep}</Text>
+  <Text>{state.counterBloodPressure}</Text>
+  </ScrollView>
+  </View>
+  )
+};
+
 
 const styles = StyleSheet.create({
   scrollView: {

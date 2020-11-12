@@ -16,7 +16,8 @@ const optionsGooglePermissions = {
     Scopes.FITNESS_BLOOD_GLUCOSE_READ,
     Scopes.FITNESS_OXYGEN_SATURATION_READ,
     Scopes.FITNESS_BODY_TEMPERATURE_READ,
-    Scopes.FITNESS_REPRODUCTIVE_HEALTH_READ
+    Scopes.FITNESS_REPRODUCTIVE_HEALTH_READ,
+    Scopes.FITNESS_SLEEP_READ
   ],
 }
 
@@ -47,7 +48,7 @@ export const connect = () => {
     case 'android':
       GoogleFit.checkIsAuthorized().then(() => {
         if (!GoogleFit.isAuthorized) {
-          GoogleFit.authorize(optionsGooglePermissions)
+          GoogleFit.authorize(optionsGooglePermissions.scopes)
             .then(authResult => {
               if (!authResult.success) {
                 console.log("AUTH_DENIED", authResult.message);
@@ -140,26 +141,27 @@ new Promise((resolve, reject) =>  {
       break;
     case 'android':
       GoogleFit.onAuthorize(() => {
+       
         const options = {
-          startDate:sDate,
-          endDate:eDate,
-          bucketUnit: "DAY", 
-          bucketInterval: 1,
+          startDate: "2017-01-01T00:00:17.971Z", 
+          endDate: new Date().toISOString(), 
         }
-        
         const callback = ((error, response) => {
           if (error){
             console.log(error)
           }
+          retBlood = {}; 
+          retBlood["googlefit.bloodpressure"] = [];
+
           retBloodPressure = [];
-            response.map(x => {retBloodPressure.push(
+            response.map(x => {retBlood["googlefit.bloodpressure"].push(
               { "bloodPressureSystolicValue":x.value,
                 "bloodPressureDiastolicValue" :x.value2,
                 "startDate": x.startDate,
                 "endDate": x.endDate
               }
               )});
-          return (retBloodPressure);
+          resolve(retBlood);
         });
         
         GoogleFit.getBloodPressureSamples(options, callback);
@@ -201,18 +203,11 @@ new Promise((resolve, reject) => {
       });
       break;
     case 'android':
-
-      console.log("Android daily steps");
-
       GoogleFit.onAuthorize(() => {
-        console.log('Sucess authentification')
-
         const options = {
-          startDate: "2020-09-01T00:00:17.971Z", // required ISO8601Timestamp
-          endDate: new Date().toISOString(), // required ISO8601Timestamp
-          bucketUnit: "SECOND", // optional - default "DAY". Valid values: "NANOSECOND" | "MICROSECOND" | "MILLISECOND" | "SECOND" | "MINUTE" | "HOUR" | "DAY"
-          bucketInterval: 1, // optional - default 1. 
-      };
+          startDate: "2020-09-01T00:00:17.971Z", 
+          endDate: new Date().toISOString(), 
+        };
       GoogleFit.getDailyStepCountSamples(options)
           .then((res) => {
               console.log("AndroidCodeNow")
@@ -225,7 +220,8 @@ new Promise((resolve, reject) => {
                   ret[x["source"]].push(y);
                 });
               });
-              alert(JSON.stringify(res))
+              // alert(JSON.stringify(ret))
+              resolve(ret)
           })
           .catch((err) => {
               console.log(err)
@@ -239,6 +235,14 @@ new Promise((resolve, reject) => {
       throw new Error('Invalid platform: ' + Platform.OS);
   }
 });
+
+function toFeet(n) {
+  n = n *100;
+  var realFeet = ((n*0.393700) / 12);
+  var feet = Math.floor(realFeet);
+  var inches = Math.round((realFeet - feet) * 12);
+  return feet + "." + inches;
+}
 
 export const getHeight = (inputOption) => 
 new Promise((resolve, reject) => {
@@ -260,6 +264,29 @@ new Promise((resolve, reject) => {
       break;
     case 'android':
       console.log("Android height");
+      GoogleFit.onAuthorize(() => {
+        const options = {
+          startDate: "2020-09-01T00:00:17.971Z", 
+          endDate: new Date().toISOString(), 
+        };
+ 
+        GoogleFit.getHeightSamples(options, (err, res) => {
+                  console.log("AndroidCodeNow")
+                  ret = {};
+                  res.map(x => {
+                    if (!ret[x["addedBy"]]) {
+                      ret[x["addedBy"]] = []
+                    }
+                      if(options.unit == "inch"){
+                        ret[x["addedBy"]].push({"value": toFeet(x["value"])});
+                      } else{
+                        ret[x["addedBy"]].push({"value": x["value"]});
+                        
+                      }
+                  });
+                  resolve(ret)
+              });
+      });
       break;
     default:
       throw new Error('Invalid platform: ' + Platform.OS);
@@ -285,6 +312,29 @@ new Promise((resolve, reject) => {
       break;
     case 'android':
       console.log("Android weight");
+      GoogleFit.onAuthorize(() => {
+        const options = {
+          startDate: "2020-09-01T00:00:17.971Z", 
+          endDate: new Date().toISOString(), 
+        };
+ 
+        GoogleFit.getWeightSamples(options, (err, res) => {
+                  console.log("AndroidCodeNow")
+                  ret = {};
+                  res.map(x => {
+                    if (!ret[x["addedBy"]]) {
+                      ret[x["addedBy"]] = []
+                    }
+                      if(options.unit == "inch"){
+                        ret[x["addedBy"]].push({"value": toFeet(x["value"])});
+                      } else{
+                        ret[x["addedBy"]].push({"value": x["value"]});
+                        
+                      }
+                  });
+                  resolve(ret)
+              });
+      });
       break;
     default:
       throw new Error('Invalid platform: ' + Platform.OS);
@@ -308,7 +358,20 @@ new Promise((resolve, reject) => {
       });
       break;
     case 'android':
-      console.log("Android weight");
+      console.log("Android Sleep");
+      GoogleFit.onAuthorize(() => {
+        const options = {
+          startDate: "2020-09-01T00:00:17.971Z", 
+          endDate: new Date().toISOString(), 
+        };
+ 
+        GoogleFit.getSleepSamples(options, (err, res) => {
+                  console.log("AndroidCodeNow")
+                  console.log("Android Sleep")
+                  console.log(res);
+                  resolve(res)
+              });
+      });
       break;
     default:
       throw new Error('Invalid platform: ' + Platform.OS);
