@@ -85,12 +85,11 @@ new Promise((resolve, reject) => {
       break;
     case 'android':
       GoogleFit.onAuthorize(() => {
-        console.log('Sucess 5555 authentification')
 
         const options = {
           startDate: "2017-01-01T00:00:17.971Z", 
           endDate: new Date().toISOString(), 
-          bucketUnit: "DAY", // optional - default "DAY". Valid values: "NANOSECOND" | "MICROSECOND" | "MILLISECOND" | "SECOND" | "MINUTE" | "HOUR" | "DAY"
+          bucketUnit: "DAY", 
           bucketInterval: 1, 
         }
         const callback = ((error, response) => {
@@ -109,8 +108,6 @@ new Promise((resolve, reject) => {
         GoogleFit.getBloodPressureSamples(options, callback);
       });
 
-      // GoogleFit.getHeartRateSamples(optionsHeartRate, callback)
-      console.log("Android heartrate");
       break;
     default:
       throw new Error('Invalid platform: ' + Platform.OS);
@@ -125,7 +122,6 @@ new Promise((resolve, reject) =>  {
         if (err) {
           return;
         }
-        console.log("bloodpressure")
         retBloodPressure = {}; 
         retBloodPressure["ios.bloodpressure"] = [];
         results.map(x => {retBloodPressure["ios.bloodpressure"].push(
@@ -172,15 +168,13 @@ new Promise((resolve, reject) =>  {
   }
 });
 
-export const getStepCount = (inputOption) => 
+export const getStepCount = ({startDateInput, endDateInput}) => 
 new Promise((resolve, reject) => {
   switch (Platform.OS) {
     case 'ios':
-    let startDate = (new Date(2016, 10, 23)).toISOString(); // required
-    let endDate = (new Date(2020, 10, 23)).toISOString(); // required
     let options = {
-      startDate,
-      endDate,
+      startDateInput,
+      endDateInput,
       ascending: false,
       limit: 10,
       period: 1440,
@@ -205,12 +199,11 @@ new Promise((resolve, reject) => {
     case 'android':
       GoogleFit.onAuthorize(() => {
         const options = {
-          startDate: "2020-09-01T00:00:17.971Z", 
-          endDate: new Date().toISOString(), 
+          startDate: startDateInput, 
+          endDate: endDateInput, 
         };
       GoogleFit.getDailyStepCountSamples(options)
           .then((res) => {
-              console.log("AndroidCodeNow")
               ret = {};
               res.map(x => {
                 x["steps"].map(y=> {
@@ -220,7 +213,6 @@ new Promise((resolve, reject) => {
                   ret[x["source"]].push(y);
                 });
               });
-              // alert(JSON.stringify(ret))
               resolve(ret)
           })
           .catch((err) => {
@@ -263,7 +255,6 @@ new Promise((resolve, reject) => {
       });
       break;
     case 'android':
-      console.log("Android height");
       GoogleFit.onAuthorize(() => {
         const options = {
           startDate: "2020-09-01T00:00:17.971Z", 
@@ -271,7 +262,6 @@ new Promise((resolve, reject) => {
         };
  
         GoogleFit.getHeightSamples(options, (err, res) => {
-                  console.log("AndroidCodeNow")
                   ret = {};
                   res.map(x => {
                     if (!ret[x["addedBy"]]) {
@@ -311,15 +301,13 @@ new Promise((resolve, reject) => {
       });
       break;
     case 'android':
-      console.log("Android weight");
       GoogleFit.onAuthorize(() => {
         const options = {
-          startDate: "2020-09-01T00:00:17.971Z", 
+          startDate: "2015-09-01T00:00:17.971Z", 
           endDate: new Date().toISOString(), 
         };
  
         GoogleFit.getWeightSamples(options, (err, res) => {
-                  console.log("AndroidCodeNow")
                   ret = {};
                   res.map(x => {
                     if (!ret[x["addedBy"]]) {
@@ -350,27 +338,17 @@ new Promise((resolve, reject) => {
           console.log(err);
           return;
         }
-        console.log("Sleep")
-        console.log(results);
         let retSleep = {}
         retSleep["ios.sleep"] = results;
         resolve(retSleep);
       });
       break;
     case 'android':
-      console.log("Android Sleep");
       GoogleFit.onAuthorize(() => {
         const options = {
           startDate: "2020-09-01T00:00:17.971Z", 
           endDate: new Date().toISOString(), 
         };
- 
-        GoogleFit.getSleepSamples(options, (err, res) => {
-                  console.log("AndroidCodeNow")
-                  console.log("Android Sleep")
-                  console.log(res);
-                  resolve(res)
-              });
       });
       break;
     default:

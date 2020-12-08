@@ -185,6 +185,7 @@ const HomeScreen = ({ navigation }) =>{
                 onPress={()=> handleSleepClick()}
               />
               <Button
+                    testId={'NextButton'}
                     title="View in full page"
                     onPress={() =>
                       navigation.navigate('Page View', { name: 'Jane' })
@@ -228,29 +229,19 @@ const App = () => {
   );
 };
 
-const HomeScreen1 = ({ navigation }) => {
-  return (
 
-    <Button
-      title="Go to Jane's profile"
-      onPress={() =>
-        navigation.navigate('Profile', state)
-      }
-    />
-  );
-};
 const ProfileScreen = (input) => {
   console.log("profilescreen")
   return (
   <View>
   <ScrollView>
-
   <Text>{state.counterSteps}</Text>
   <Text>{state.counterHeartRate}</Text>
   <Text>{state.counterHeight}</Text>
   <Text>{state.counterWeight}</Text>
   <Text>{state.counterSleep}</Text>
   <Text>{state.counterBloodPressure}</Text>
+  <Text>Health</Text>
   </ScrollView>
   </View>
   )
